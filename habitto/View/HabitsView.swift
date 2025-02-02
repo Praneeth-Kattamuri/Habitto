@@ -1,13 +1,9 @@
-//
-//  HabitsView.swift
-//  habitto
-//
-//  Created by K Praneeth on 2/2/25.
-//
 import SwiftUI
 
 struct HabitsView: View {
     @State private var isShowingAddHabit = false
+    @State private var isShowingEditHabit = false
+    @State private var selectedHabit: Habit? = nil
     @ObservedObject var habitController = HabitController()
 
     var body: some View {
@@ -24,6 +20,15 @@ struct HabitsView: View {
                                 .font(.headline)
                             Text("Category: \(habit.category)")
                                 .font(.subheadline)
+                            
+                            // Edit button
+                            Button(action: {
+                                selectedHabit = habit
+                                isShowingEditHabit = true
+                            }) {
+                                Text("Edit")
+                                    .foregroundColor(.blue)
+                            }
                         }
                     }
                 }
@@ -40,6 +45,13 @@ struct HabitsView: View {
             }
             .sheet(isPresented: $isShowingAddHabit) {
                 AddHabitView(controller: habitController)
+            }
+            .sheet(isPresented: $isShowingEditHabit, onDismiss: {
+                selectedHabit = nil
+            }) {
+                if let habit = selectedHabit {
+                    EditHabitView(habit: habit, controller: habitController)
+                }
             }
         }
     }

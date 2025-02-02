@@ -13,4 +13,10 @@ class HabitController: ObservableObject {
     func addHabit(_ habit: Habit) {
         habits.append(habit)
     }
+    
+    func updateHabit(_ habit: Habit) {
+            if let index = habits.firstIndex(where: { $0.id == habit.id }) {
+                habits[index] = habit
+            }
+        }
 }
