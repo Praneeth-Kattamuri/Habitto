@@ -2,8 +2,6 @@ import SwiftUI
 
 struct HabitsView: View {
     @State private var isShowingAddHabit = false
-    @State private var isShowingEditHabit = false
-    @State private var selectedHabit: Habit? = nil
     @ObservedObject var habitController = HabitController()
 
     var body: some View {
@@ -14,22 +12,16 @@ struct HabitsView: View {
                         .font(.title2)
                         .foregroundColor(.gray)
                 } else {
-                    List(habitController.habits) { habit in
-                        VStack(alignment: .leading) {
-                            Text(habit.name)
-                                .font(.headline)
-                            Text("Category: \(habit.category)")
-                                .font(.subheadline)
-                            
-                            // Edit button
-                            Button(action: {
-                                selectedHabit = habit
-                                isShowingEditHabit = true
-                            }) {
-                                Text("Edit")
-                                    .foregroundColor(.blue)
+                    ScrollView {
+                        VStack(spacing: 15) {
+                            ForEach(habitController.habits) { habit in
+                                NavigationLink(destination: HabitDetailView(habit: habit, controller: habitController)) {
+                                    HabitCardView(habit: habit)
+                                }
+                                .buttonStyle(PlainButtonStyle()) // Removes default link styling
                             }
                         }
+                        .padding()
                     }
                 }
             }
@@ -45,13 +37,6 @@ struct HabitsView: View {
             }
             .sheet(isPresented: $isShowingAddHabit) {
                 AddHabitView(controller: habitController)
-            }
-            .sheet(isPresented: $isShowingEditHabit, onDismiss: {
-                selectedHabit = nil
-            }) {
-                if let habit = selectedHabit {
-                    EditHabitView(habit: habit, controller: habitController)
-                }
             }
         }
     }
