@@ -16,7 +16,18 @@ struct HabitsView: View {
                         VStack(spacing: 15) {
                             ForEach(habitController.habits) { habit in
                                 NavigationLink(destination: HabitDetailView(habit: habit, controller: habitController)) {
-                                    HabitCardView(habit: habit)
+                                    // Use the category of the habit to decide which card to show
+                                    if habit.category == "Health" {
+                                        HealthHabitCard(habit: habit)
+                                    } else if habit.category == "Work" {
+                                        WorkHabitCard(habit: habit)
+                                    } else if habit.category == "Personal Growth" {
+                                        PersonalGrowthHabitCard(habit: habit)
+                                    } else if habit.category == "Hobbies" {
+                                        HobbiesHabitCard(habit: habit)
+                                    } else {
+                                        OtherHabitCard(habit: habit)
+                                    }
                                 }
                                 .buttonStyle(PlainButtonStyle()) // Removes default link styling
                             }
