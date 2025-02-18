@@ -4,17 +4,21 @@ struct HabitsView: View {
     @State private var isShowingAddHabit = false
     @ObservedObject var habitController = HabitController()
 
+    // Store fetched habits in a state to simplify the view body
+    @State private var fetchedHabits: [Habit] = []
+
     var body: some View {
         NavigationView {
             VStack {
-                if habitController.habits.isEmpty {
+                if fetchedHabits.isEmpty {
                     Text("No habits added yet")
                         .font(.title2)
                         .foregroundColor(.gray)
                 } else {
                     ScrollView {
                         VStack(spacing: 15) {
-                            ForEach(habitController.habits) { habit in
+                            // Iterate over the habits
+                            ForEach(fetchedHabits) { habit in
                                 NavigationLink(destination: HabitDetailView(habit: habit, controller: habitController)) {
                                     // Use the category of the habit to decide which card to show
                                     if habit.category == "Health" {
@@ -49,6 +53,10 @@ struct HabitsView: View {
             .sheet(isPresented: $isShowingAddHabit) {
                 AddHabitView(controller: habitController)
             }
+        }
+        .onAppear {
+            // Fetch the habits when the view appears
+            fetchedHabits = habitController.fetchHabits()
         }
     }
 }

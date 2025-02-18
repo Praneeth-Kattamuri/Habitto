@@ -1,4 +1,5 @@
 import Foundation
+import CoreData
 
 class HabitController: ObservableObject {
     @Published var habits: [Habit] = [] {
@@ -12,8 +13,52 @@ class HabitController: ObservableObject {
     }
 
     func addHabit(_ habit: Habit) {
-        habits.append(habit)
+            let context = PersistenceController.shared.container.viewContext
+            
+            // Create a new HabitEntity object
+            let newHabitEntity = HabitEntity(context: context)
+            newHabitEntity.name = habit.name
+            newHabitEntity.category = habit.category
+            newHabitEntity.createdDate = habit.createdDate
+            newHabitEntity.frequency = Int32(habit.frequency)
+            newHabitEntity.days = habit.days as NSObject
+            
+            // Save to Core Data
+            do {
+                try context.save()
+            } catch {
+                print("Failed to save: \(error)")
+            }
+            
+            // Add to the local habits array (optional, if you want to keep the in-memory list)
+            habits.append(habit)
+
     }
+    
+    func fetchHabits() -> [Habit] {
+        let context = PersistenceController.shared.container.viewContext
+        let fetchRequest: NSFetchRequest<HabitEntity> = HabitEntity.fetchRequest()
+
+        do {
+            let fetchedHabits = try context.fetch(fetchRequest)
+            return fetchedHabits.map { habitEntity in
+                // Convert each HabitEntity to a Habit struct
+                Habit(
+                    name: habitEntity.name ?? "",
+                    category: habitEntity.category ?? "",
+                    days: (habitEntity.days as? [String]) ?? [],
+                    frequency: Int(habitEntity.frequency),
+                    time: habitEntity.time ?? Date(),
+                    createdDate: habitEntity.createdDate ?? Date()
+                )
+            }
+        } catch {
+            print("Failed to fetch habits: \(error)")
+            return [] // Return an empty array if fetch fails
+        }
+    }
+
+
 
     func updateHabit(_ habit: Habit) {
         if let index = habits.firstIndex(where: { $0.id == habit.id }) {
